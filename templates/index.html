@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Modelo de Anonimizacion</title>
+    <title>Modelo de Anonimización</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   </head>
   <body>
     <div class="container">
@@ -24,11 +25,11 @@
         <button type="submit" class="btn btn-primary">Procesar archivo</button>
       </form>
       {% if modified_text %}
-      <h2>Texto Modificado:</h2>
+      <h2>Texto Anonimizado:</h2>
       <p>{{ modified_text }}</p>
       {% endif %}
       {% if ner_results %}
-      <h2>Resultados del modelo:</h2>
+      <h2>Resultados del Modelo:</h2>
       <ul>
         {% for entity in ner_results %}
         <li>
