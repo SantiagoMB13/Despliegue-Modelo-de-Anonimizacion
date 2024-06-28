@@ -15,9 +15,15 @@ def replace_entities(text, entities):
     offset = 0
     for entity in entities:
         if entity['entity_group'] == 'PER':
-            replacement = 'persona_anonima'
+            replacement = 'persona_anónima'
         elif entity['entity_group'] == 'LOC':
-            replacement = 'lugar_anonimo'
+            replacement = 'lugar_anónimo'
+        elif entity['entity_group'] == 'ORG':
+            replacement = 'organización_anónima'
+        elif entity['entity_group'] == 'OTH':
+            replacement = 'otro_anónimo'
+        elif entity['entity_group'] == 'MISC':
+            replacement = 'misceláneo_anónimo'
         else:
             continue
 
