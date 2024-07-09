@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Modelo de Anonimización</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Modelo de Anonimización</h1>
+      <form method="post" action="/" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="input_text">Texto de entrada:</label>
+          <textarea class="form-control" id="input_text" name="input_text" rows="4">{{ input_text }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Procesar Texto</button>
+      </form>
+      <br>
+      <form method="post" action="/" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="file">Subir archivo .txt:</label>
+          <input type="file" class="form-control-file" id="file" name="file">
+        </div>
+        <button type="submit" class="btn btn-primary">Procesar archivo</button>
+      </form>
+      {% if modified_text %}
+      <h2>Texto Anonimizado:</h2>
+      <p>{{ modified_text }}</p>
+      {% endif %}
+      {% if ner_results %}
+      <h2>Resultados del Modelo:</h2>
+      <ul>
+        {% for entity in ner_results %}
+        <li>
+          <strong>Entidad:</strong> {{ entity['word'] }}<br>
+          <strong>Grupo de entidad:</strong> {{ entity['entity_group'] }}<br>
+          <strong>Puntaje:</strong> {{ entity['score'] }}<br>
+          <strong>Inicio:</strong> {{ entity['start'] }}<br>
+          <strong>Fin:</strong> {{ entity['end'] }}<br>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </body>
+</html>
