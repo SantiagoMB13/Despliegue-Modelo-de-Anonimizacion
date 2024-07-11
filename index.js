@@ -122,6 +122,21 @@ function displayResults(replacedText, entities) {
 
     output += '</ul>';
 
+    // Boton de descarga
+    output += '<button id="downloadButton" class="btn btn-primary">Descargar Texto Anonimizado</button>';
+
     console.log(entities);
     resultDiv.innerHTML = output;
+
+    // EventListener para realizar la descarga del txt
+    document.getElementById('downloadButton').addEventListener('click', function() {
+        const blob = new Blob([replacedText], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'nota_anonimizada.txt';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
 }
+
