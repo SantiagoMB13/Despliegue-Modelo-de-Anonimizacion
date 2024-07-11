@@ -9,7 +9,7 @@ const pipe = await pipeline('token-classification', 'Xenova/bert-base-multilingu
 // Selecciona el botón por su ID (supongamos que el ID del botón es "miBoton")
 const boton = document.getElementById('runmodelbtn');
 
-// Event listener para el boton de analizar
+// Event listener para el boton de analizar texto
 document.getElementById('runmodelbtn').addEventListener('click', async () => {
     const inputText = document.getElementById('input-text').value;
     if (inputText) {
@@ -33,6 +33,13 @@ document.getElementById('uploadfilebtn').addEventListener('click', async () => {
     } else {
         alert('Por favor, suba un archivo.');
     }
+});
+
+// Event listener para borrar resultados anteriores
+document.getElementById('clearResultsBtn').addEventListener('click', () => {
+    document.getElementById('result').innerHTML = '';
+    document.getElementById('input-text').value = '';
+    document.getElementById('file-input').value = '';
 });
 
 // Función para ejecutar NER en el texto ingresado
