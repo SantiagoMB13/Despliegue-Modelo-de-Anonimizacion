@@ -9,17 +9,41 @@ const pipe = await pipeline('token-classification', 'Xenova/bert-base-multilingu
 // Selecciona el botón por su ID (supongamos que el ID del botón es "miBoton")
 const boton = document.getElementById('runmodelbtn');
 
-// Añade el event listener para el click
-boton.addEventListener('click', function() {
-    // Aquí colocas el código que quieres que se ejecute cuando el botón sea clickeado
-    console.log('El botón ha sido clickeado');
-    runNER();
-    // Puedes añadir más funcionalidad aquí
+// Event listener para el boton de analizar texto
+document.getElementById('runmodelbtn').addEventListener('click', async () => {
+    const inputText = document.getElementById('input-text').value;
+    if (inputText) {
+        await runNER(inputText);
+    } else {
+        alert('Por favor, ingrese algún texto.');
+    }
+});
+
+// Añadir event listener para subir y analizar archivo
+document.getElementById('uploadfilebtn').addEventListener('click', async () => {
+    const fileInput = document.getElementById('file-input');
+    const file = fileInput.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const inputText = e.target.result;
+            await runNER(inputText);
+        };
+        reader.readAsText(file);
+    } else {
+        alert('Por favor, suba un archivo.');
+    }
+});
+
+// Event listener para borrar resultados anteriores
+document.getElementById('clearResultsBtn').addEventListener('click', () => {
+    document.getElementById('result').innerHTML = '';
+    document.getElementById('input-text').value = '';
+    document.getElementById('file-input').value = '';
 });
 
 // Función para ejecutar NER en el texto ingresado
-async function runNER() {
-    const inputText = document.getElementById('input-text').value;
+async function runNER(inputText) {
     const resultDiv = document.getElementById('result');
 
     if (!inputText) {
