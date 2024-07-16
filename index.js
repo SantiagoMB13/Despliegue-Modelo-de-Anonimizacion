@@ -73,13 +73,13 @@ async function runNER(inputText) {
     }
 }
 
-// Función para dividir el texto en segmentos de 4 oraciones
+// Función para dividir el texto en segmentos de 2 oraciones
 function splitText(text) {
     const sentences = text.split('.');
     const segments = [];
 
-    for (let i = 0; i < sentences.length; i += 4) {
-        const segment = sentences.slice(i, i + 4).join('.') + '.';
+    for (let i = 0; i < sentences.length; i += 2) {
+        const segment = sentences.slice(i, i + 2).join('.') + '.';
         segments.push(segment.trim());
     }
 
