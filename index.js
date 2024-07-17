@@ -119,7 +119,11 @@ function replaceEntities(text, entities, mode) {
             if (entity.entity.includes('PER')) {
                 replacement = faker.person.firstName() + ' ' + faker.person.lastName();
             } else if (entity.entity.includes('LOC')) {
-                replacement = faker.location.country();
+                if (/\d/.test(entity.word)) {
+                    replacement = faker.location.streetAddress(true);
+                } else {
+                    replacement = faker.location.country();
+                }
             } else if (entity.entity.includes('ORG')) {
                 replacement = faker.company.name();
             } else {
@@ -129,7 +133,11 @@ function replaceEntities(text, entities, mode) {
             if (entity.entity.includes('PER')) {
                 replacement = '[persona]';
             } else if (entity.entity.includes('LOC')) {
-                replacement = '[lugar]';
+                if (/\d/.test(entity.word)) {
+                    replacement = '[dirección]';
+                } else {
+                    replacement = '[lugar]';
+                }
             } else if (entity.entity.includes('ORG')) {
                 replacement = '[organización]';
             } else {
