@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modelo de Anonimización</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+        <h1>Modelo de Anonimización</h1>
+        <textarea id="input-text" placeholder="Ingrese su texto aquí..."></textarea>
+        <button id="runmodelbtn">Analizar</button>
+        <div>
+            <input type="file" id="file-input" />
+            <button id="uploadfilebtn">Subir y Analizar Archivo</button>
+        </div>
+        <div id="result"></div>
+        <button id="clearResultsBtn" class="btn btn-secondary">Borrar Resultados</button>
+    <script src="index.js" type="module"></script>
+</body>
+
+</html>
