@@ -1,4 +1,4 @@
-import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0';
+import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.0';
 import { fakerES as faker } from "https://esm.sh/@faker-js/faker@v8.4.0";
 
 env.allowLocalModels = false;
@@ -56,8 +56,10 @@ async function runNER(inputText, mode) {
         for (const segment of segments) {
             const entities = await pipe(segment);
             const cleanedSegmentEntities = cleanEntities(entities);
-            cleanedEntities = cleanedEntities.concat(cleanedSegmentEntities);
-            replacedText += " " + replaceEntities(segment, cleanedSegmentEntities, mode);
+            console.log(cleanedSegmentEntities);
+            const filteredEntities = filterEntities(cleanedSegmentEntities);
+            cleanedEntities = cleanedEntities.concat(filteredEntities);
+            replacedText += " " + replaceEntities(segment, filteredEntities, mode);
         }
         replacedText = replacedText.slice(0, -1);
         displayResults(replacedText, cleanedEntities);
@@ -101,6 +103,10 @@ function cleanEntities(entities) {
     }
 
     return cleanedEntities;
+}
+
+function filterEntities(entities) {
+    return entities.filter(entity => entity.score >= 0.6);
 }
 
 function replaceEntities(text, entities, mode) {
