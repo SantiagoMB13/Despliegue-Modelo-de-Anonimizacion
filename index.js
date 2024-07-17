@@ -1,4 +1,5 @@
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0';
+import { fakerES as faker } from "https://esm.sh/@faker-js/faker@v8.4.0";
 
 // Since we will download the model from the Hugging Face Hub, we can skip the local model check
 env.allowLocalModels = false;
@@ -123,8 +124,20 @@ function replaceEntities(text, entities) {
     let replacedText = text;
 
     entities.forEach(entity => {
+        let replacement;
+
+        if (entity.entity.includes('PER')) {
+            replacement = faker.person.firstName() + ' ' + faker.person.lastName();
+        } else if (entity.entity.includes('LOC')) {
+            replacement = faker.location.country();
+        } else if (entity.entity.includes('ORG')) {
+            replacement = faker.company.name();
+        } else {
+            replacement = entity.entity; // Mantener el valor original si no coincide con 'PER', 'LOC', o 'ORG'
+        }
+
         const regex = new RegExp(`\\b${entity.word}\\b`, 'g');
-        replacedText = replacedText.replace(regex, entity.entity);
+        replacedText = replacedText.replace(regex, replacement);
     });
 
     return replacedText;
@@ -163,4 +176,3 @@ function displayResults(replacedText, entities) {
         document.body.removeChild(link);
     });
 }
-
