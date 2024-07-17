@@ -1,34 +1,31 @@
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0';
 import { fakerES as faker } from "https://esm.sh/@faker-js/faker@v8.4.0";
 
-// Since we will download the model from the Hugging Face Hub, we can skip the local model check
 env.allowLocalModels = false;
-
-// Create a new object detection pipeline
 const pipe = await pipeline('token-classification', 'Xenova/bert-base-multilingual-cased-ner-hrl');
 
-// Selecciona el botón por su ID (supongamos que el ID del botón es "miBoton")
+// Selecciona el botón por su ID
 const boton = document.getElementById('runmodelbtn');
 
-// Event listener para el boton de analizar texto
 document.getElementById('runmodelbtn').addEventListener('click', async () => {
     const inputText = document.getElementById('input-text').value;
+    const mode = document.getElementById('anonimization-mode').value;
     if (inputText) {
-        await runNER(inputText);
+        await runNER(inputText, mode);
     } else {
         alert('Por favor, ingrese algún texto.');
     }
 });
 
-// Añadir event listener para subir y analizar archivo
 document.getElementById('uploadfilebtn').addEventListener('click', async () => {
     const fileInput = document.getElementById('file-input');
     const file = fileInput.files[0];
+    const mode = document.getElementById('anonimization-mode').value;
     if (file) {
         const reader = new FileReader();
         reader.onload = async (e) => {
             const inputText = e.target.result;
-            await runNER(inputText);
+            await runNER(inputText, mode);
         };
         reader.readAsText(file);
     } else {
@@ -36,15 +33,13 @@ document.getElementById('uploadfilebtn').addEventListener('click', async () => {
     }
 });
 
-// Event listener para borrar resultados anteriores
 document.getElementById('clearResultsBtn').addEventListener('click', () => {
     document.getElementById('result').innerHTML = '';
     document.getElementById('input-text').value = '';
     document.getElementById('file-input').value = '';
 });
 
-// Función para ejecutar NER en el texto ingresado
-async function runNER(inputText) {
+async function runNER(inputText, mode) {
     const resultDiv = document.getElementById('result');
 
     if (!inputText) {
@@ -55,18 +50,15 @@ async function runNER(inputText) {
     resultDiv.textContent = 'Analizando...';
 
     try {
-        // Divide el texto en segmentos de 4 oraciones para mejorar la precisión
         const segments = splitText(inputText);
         let cleanedEntities = [];
         let replacedText = '';
-        // Procesa cada segmento y concatena los resultados
         for (const segment of segments) {
             const entities = await pipe(segment);
             const cleanedSegmentEntities = cleanEntities(entities);
             cleanedEntities = cleanedEntities.concat(cleanedSegmentEntities);
-            replacedText += " " + replaceEntities(segment, cleanedSegmentEntities);
+            replacedText += " " + replaceEntities(segment, cleanedSegmentEntities, mode);
         }
-        // Elimina el último punto que se añade de más en blanco
         replacedText = replacedText.slice(0, -1);
         displayResults(replacedText, cleanedEntities);
     } catch (error) {
@@ -74,27 +66,22 @@ async function runNER(inputText) {
     }
 }
 
-// Función para dividir el texto en segmentos de 2 oraciones
 function splitText(text) {
     const sentences = text.split('.');
     const segments = [];
-
     for (let i = 0; i < sentences.length; i += 2) {
         const segment = sentences.slice(i, i + 2).join('.') + '.';
         segments.push(segment.trim());
     }
-
     return segments;
 }
 
-// Función para limpiar las entidades
 function cleanEntities(entities) {
     const cleanedEntities = [];
     let currentEntity = null;
 
     entities.forEach((entity, index) => {
         if (currentEntity && entity.index === currentEntity.index + 1) {
-            // Concatena palabras con índices sucesivos
             if (entity.word.startsWith('##')) {
                 currentEntity.word += entity.word.replace('##', '');
             } else {
@@ -102,16 +89,13 @@ function cleanEntities(entities) {
             }
             currentEntity.index = entity.index;
         } else {
-            // Añade la entidad anterior a cleanedEntities
             if (currentEntity) {
                 cleanedEntities.push(currentEntity);
             }
-            // Inicializa una nueva entidad
             currentEntity = { ...entity };
         }
     });
 
-    // Añade la última entidad al cleanedEntities
     if (currentEntity) {
         cleanedEntities.push(currentEntity);
     }
@@ -119,21 +103,32 @@ function cleanEntities(entities) {
     return cleanedEntities;
 }
 
-// Función para reemplazar entidades en el texto
-function replaceEntities(text, entities) {
+function replaceEntities(text, entities, mode) {
     let replacedText = text;
 
     entities.forEach(entity => {
         let replacement;
 
-        if (entity.entity.includes('PER')) {
-            replacement = faker.person.firstName() + ' ' + faker.person.lastName();
-        } else if (entity.entity.includes('LOC')) {
-            replacement = faker.location.country();
-        } else if (entity.entity.includes('ORG')) {
-            replacement = faker.company.name();
-        } else {
-            replacement = entity.entity; // Mantener el valor original si no coincide con 'PER', 'LOC', o 'ORG'
+        if (mode === 'advanced') {
+            if (entity.entity.includes('PER')) {
+                replacement = faker.person.firstName() + ' ' + faker.person.lastName();
+            } else if (entity.entity.includes('LOC')) {
+                replacement = faker.location.country();
+            } else if (entity.entity.includes('ORG')) {
+                replacement = faker.company.name();
+            } else {
+                replacement = entity.entity;
+            }
+        } else if (mode === 'generic') {
+            if (entity.entity.includes('PER')) {
+                replacement = '[persona]';
+            } else if (entity.entity.includes('LOC')) {
+                replacement = '[lugar]';
+            } else if (entity.entity.includes('ORG')) {
+                replacement = '[organización]';
+            } else {
+                replacement = entity.entity;
+            }
         }
 
         const regex = new RegExp(`\\b${entity.word}\\b`, 'g');
@@ -143,11 +138,9 @@ function replaceEntities(text, entities) {
     return replacedText;
 }
 
-// Función para mostrar los resultados
 function displayResults(replacedText, entities) {
     const resultDiv = document.getElementById('result');
 
-    // Crea la salida con subtítulos y listas no ordenadas
     let output = `<h2>Texto anonimizado</h2><p>${replacedText}</p>`;
     output += '<h2>Resultados del modelo</h2><ul>';
 
@@ -158,14 +151,10 @@ function displayResults(replacedText, entities) {
     });
 
     output += '</ul>';
-
-    // Boton de descarga
     output += '<button id="downloadButton" class="btn btn-primary">Descargar Texto Anonimizado</button>';
 
-    console.log(entities);
     resultDiv.innerHTML = output;
 
-    // EventListener para realizar la descarga del txt
     document.getElementById('downloadButton').addEventListener('click', function() {
         const blob = new Blob([replacedText], { type: 'text/plain' });
         const link = document.createElement('a');
