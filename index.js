@@ -167,7 +167,7 @@ function replaceEntities(text, entities, mode) {
 // Función para reemplazar entidades secundarias como correos electrónicos, números de teléfono, cédulas y fechas mediante RegEx
 function secondaryReplacements(text, mode) {
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-    const phoneRegex = /(\d\s*\.?\s*){10}/g; //Se puede quitar 
+    const phoneRegex = /(\d\s*\.?\s*){10}(?=\s|\.|\n|$)/g;
     const idRegex = /(\d\s*\.?\s*){5,}/g;
     const dateRegex = /\b\d{2}[-/]\d{2}[-/]\d{4}\b/g; // Se puede separar en 2 para los formatos dd/mm/yyyy y dd-mm-yyyy
     //Ahora mismo se consideran formatos incorrectos como dd-mm/yyyy o dd/mm-yyyy, pero por ahora no se considera un problema al ser un caso demasiado específico
@@ -176,18 +176,18 @@ function secondaryReplacements(text, mode) {
     
     if (mode === 'advanced') {
         emailReplacement = faker.internet.email();
-        phoneReplacement = faker.helpers.fromRegExp('[0-9]{10}'); //Se puede quitar
+        phoneReplacement = faker.helpers.fromRegExp('[0-9]{10}');
         idReplacement = faker.string.numeric({ length: { min: 5, max: 12 }, allowLeadingZeros: false });
         dateReplacement = faker.number.int({ min: 1, max: 31 }) + '/' + faker.number.int({ min: 1, max: 12 }) + '/' + faker.number.int({ min: 1900, max: 2024 });
     } else {
         emailReplacement = '[email]';
-        phoneReplacement = '[celular]'; //Se puede quitar
+        phoneReplacement = '[celular]'; 
         idReplacement = '[id]';
         dateReplacement = '[fecha]';
     }
     
     text = text.replace(emailRegex, emailReplacement);
-    text = text.replace(phoneRegex, phoneReplacement); //Se puede quitar
+    text = text.replace(phoneRegex, phoneReplacement); 
     text = text.replace(idRegex, idReplacement);
     text = text.replace(dateRegex, dateReplacement);
     
