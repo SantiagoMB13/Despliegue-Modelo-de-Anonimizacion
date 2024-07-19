@@ -97,3 +97,20 @@ select {
     border-radius: 5px;
     padding: 5px;
 }
+
+pre {
+    background-color: #f8f9fa; /* Color de fondo suave */
+    padding: 15px; /* Espaciado interno */
+    border: 1px solid #ddd; /* Borde */
+    border-radius: 5px; /* Bordes redondeados */
+    font-family: 'Courier New', Courier, monospace; /* Fuente monoespaciada */
+    font-size: 14px; /* Tamaño de fuente */
+    line-height: 1.6; /* Altura de línea */
+    white-space: pre-wrap; /* Permite el ajuste de línea */
+    overflow-x: auto; /* Barra de desplazamiento horizontal si es necesario */
+    margin-bottom: 20px; /* Espaciado inferior */
+}
+
+pre code {
+    display: block;
+}

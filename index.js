@@ -44,6 +44,7 @@ document.getElementById('clearResultsBtn').addEventListener('click', () => {
 });
 
 // Función para ejecutar el modelo NER
+// Función para ejecutar el modelo NER
 async function runNER(inputText, mode) {
     const resultDiv = document.getElementById('result');
 
@@ -57,15 +58,15 @@ async function runNER(inputText, mode) {
     try {
         const segments = splitText(inputText);
         let cleanedEntities = [];
-        let replacedText = '';
+        let replacedTextLines = [];
         for (const segment of segments) {
             const entities = await pipe(segment);
             const cleanedSegmentEntities = cleanEntities(entities);
             const filteredEntities = filterEntities(cleanedSegmentEntities);
             cleanedEntities = cleanedEntities.concat(filteredEntities);
-            replacedText += " " + replaceEntities(segment, filteredEntities, mode) + " ";
+            replacedTextLines.push(replaceEntities(segment, filteredEntities, mode));
         }
-        replacedText = replacedText.slice(0, -1);
+        let replacedText = replacedTextLines.join('\n');
         replacedText = secondaryReplacements(replacedText, mode);
         displayResults(replacedText, cleanedEntities);
     } catch (error) {
@@ -75,15 +76,7 @@ async function runNER(inputText, mode) {
 
 // Función para separar el texto por saltos de línea
 function splitText(text) {
-    const lines = text.split('\n');
-    const segments = [];
-    for (let i = 0; i < lines.length; i++) {
-        const segment = lines[i].trim();
-        if (segment) {
-            segments.push(segment);
-        }
-    }
-    return segments;
+    return text.split('\n');
 }
 
 // Función para limpiar las entidades y combinar las que tengan un índice consecutivo para formar una sola entidad.
@@ -167,8 +160,8 @@ function replaceEntities(text, entities, mode) {
 // Función para reemplazar entidades secundarias como correos electrónicos, números de teléfono, cédulas y fechas mediante RegEx
 function secondaryReplacements(text, mode) {
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-    const phoneRegex = /(?<!\d)(\d\s*\.?\s*){10}(?=\s|\.|\n|$)/g;
-    const idRegex = /(\d\s*\.?\s*){5,}/g;
+    const phoneRegex = /(?<!\d)(\d\s*){10}(?=\s|\n|$)/g;
+    const idRegex = /(\d\s*\.?\s*){5,}(?=\s|\n|$)/g;
     const dateRegex = /\b\d{2}[-/]\d{2}[-/]\d{4}\b/g; // Se puede separar en 2 para los formatos dd/mm/yyyy y dd-mm-yyyy
     //Ahora mismo se consideran formatos incorrectos como dd-mm/yyyy o dd/mm-yyyy, pero por ahora no se considera un problema al ser un caso demasiado específico
     
@@ -198,7 +191,7 @@ function secondaryReplacements(text, mode) {
 function displayResults(replacedText, entities) {
     const resultDiv = document.getElementById('result');
 
-    let output = `<h2>Texto anonimizado</h2><p>${replacedText}</p>`;
+    let output = `<h2>Texto anonimizado</h2><pre>${replacedText}</pre>`;
     output += '<h2>Resultados del modelo</h2><ul>';
 
     entities.forEach(entity => {
