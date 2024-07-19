@@ -167,7 +167,7 @@ function replaceEntities(text, entities, mode) {
 // Función para reemplazar entidades secundarias como correos electrónicos, números de teléfono, cédulas y fechas mediante RegEx
 function secondaryReplacements(text, mode) {
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-    const phoneRegex = /(\d\s*\.?\s*){10}(?=\s|\.|\n|$)/g;
+    const phoneRegex = /(?<!\d)(\d\s*\.?\s*){10}(?=\s|\.|\n|$)/g;
     const idRegex = /(\d\s*\.?\s*){5,}/g;
     const dateRegex = /\b\d{2}[-/]\d{2}[-/]\d{4}\b/g; // Se puede separar en 2 para los formatos dd/mm/yyyy y dd-mm-yyyy
     //Ahora mismo se consideran formatos incorrectos como dd-mm/yyyy o dd/mm-yyyy, pero por ahora no se considera un problema al ser un caso demasiado específico
