@@ -1,6 +1,7 @@
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.0';
 import { fakerES as faker } from "https://esm.sh/@faker-js/faker@v8.4.0";
 
+
 // Cargamos el modelo desde Hugging Face
 env.allowLocalModels = false;
 const pipe = await pipeline('token-classification', 'Xenova/bert-base-multilingual-cased-ner-hrl');
@@ -24,17 +25,39 @@ document.getElementById('uploadfilebtn').addEventListener('click', async () => {
     const fileInput = document.getElementById('file-input');
     const file = fileInput.files[0];
     const mode = document.getElementById('anonimization-mode').value;
+    
     if (file) {
         const reader = new FileReader();
-        reader.onload = async (e) => {
-            const inputText = e.target.result;
-            await runNER(inputText, mode);
-        };
-        reader.readAsText(file);
+        const fileType = file.name.split('.').pop().toLowerCase();
+
+        if (fileType === 'txt') {
+            reader.onload = async (e) => {
+                const inputText = e.target.result;
+                await runNER(inputText, mode);
+            };
+            reader.readAsText(file);
+        } else if (fileType === 'docx') {
+            reader.onload = async (e) => {
+                const arrayBuffer = e.target.result;
+                mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+                    .then(async (result) => {
+                        const inputText = result.value;
+                        await runNER(inputText, mode);
+                    })
+                    .catch((error) => {
+                        console.error('Error reading .docx file:', error);
+                        alert('Error leyendo el archivo .docx.');
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            alert('Formato de archivo no soportado. Por favor, suba un archivo .txt o .docx.');
+        }
     } else {
         alert('Por favor, suba un archivo.');
     }
 });
+
 
 // Evento para el botón de limpiar resultados
 document.getElementById('clearResultsBtn').addEventListener('click', () => {
