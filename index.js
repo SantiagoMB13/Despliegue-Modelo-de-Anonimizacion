@@ -7,7 +7,7 @@ env.allowLocalModels = false;
 const pipe = await pipeline('token-classification', 'Xenova/bert-base-multilingual-cased-ner-hrl');
 
 // Initialize JSZip
-const zip = new JSZip();
+let zip = new JSZip();
 
 // Selecciona el botón por su ID
 const boton = document.getElementById('runmodelbtn');
@@ -48,6 +48,7 @@ document.getElementById('uploadfilebtn').addEventListener('click', async () => {
     const mode = document.getElementById('anonimization-mode').value;
     if (files.length > 0) {
         document.getElementById('result').innerHTML = ''; // Clear previous results
+        zip = new JSZip(); // Reinitialize JSZip to clear previous files
         for (let file of files) {
             await processFile(file, mode);
         }
@@ -95,7 +96,7 @@ document.getElementById('clearResultsBtn').addEventListener('click', () => {
     document.getElementById('file-input').value = '';
     document.getElementById('downloadZipBtn').style.display = 'none';
     document.getElementById('downloadSingleBtn').style.display = 'none';
-    zip.remove('anonymized_files'); // Clear the zip contents
+    zip = new JSZip(); // Reinitialize JSZip to clear previous files
 });
 
 // Función para ejecutar el modelo NER
