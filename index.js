@@ -1,6 +1,10 @@
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.0';
 import { fakerES as faker } from "https://esm.sh/@faker-js/faker@v8.4.0";
 import JSZip from 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm';
+import pdfjsLib from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/+esm';
+
+// Set the workerSrc for pdf.js
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
 
 // Cargamos el modelo desde Hugging Face
 env.allowLocalModels = false;
@@ -84,9 +88,30 @@ async function processFile(file, mode) {
                 });
         };
         reader.readAsArrayBuffer(file);
+    } else if (fileType === 'pdf') {
+        reader.onload = async (e) => {
+            const arrayBuffer = e.target.result;
+            const inputText = await extractTextFromPDF(arrayBuffer);
+            await runNER(inputText, mode, file.name);
+        };
+        reader.readAsArrayBuffer(file);
     } else {
-        alert('Formato de archivo no soportado. Por favor, suba un archivo .txt o .docx.');
+        alert('Formato de archivo no soportado. Por favor, suba un archivo .txt, .docx o .pdf.');
     }
+}
+
+async function extractTextFromPDF(arrayBuffer) {
+    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+    const pdf = await loadingTask.promise;
+    let text = '';
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(' ');
+        text += pageText + '\n';
+    }
+    return text;
 }
 
 // Evento para el botón de limpiar resultados
@@ -125,6 +150,13 @@ async function runNER(inputText, mode, filename = '') {
         replacedText = secondaryReplacements(replacedText, mode);
         anonymizedText = replacedText; // Store the anonymized text
         displayResults(replacedText, cleanedEntities, filename);
+        
+        // If only one file is processed, enable the single file download
+        if (filename && document.getElementById('file-input').files.length === 1) {
+            document.getElementById('downloadSingleBtn').style.display = 'block';
+            document.getElementById('downloadZipBtn').style.display = 'none';
+        }
+        
     } catch (error) {
         resultDiv.innerHTML += `<p>Error al procesar el texto ${filename}: ${error.message}</p>`;
     }
