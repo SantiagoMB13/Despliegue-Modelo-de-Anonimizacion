@@ -1,51 +1,105 @@
 import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.0';
 import { fakerES as faker } from "https://esm.sh/@faker-js/faker@v8.4.0";
+import JSZip from 'https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm';
 
 // Cargamos el modelo desde Hugging Face
 env.allowLocalModels = false;
 const pipe = await pipeline('token-classification', 'Xenova/bert-base-multilingual-cased-ner-hrl');
 
+// Initialize JSZip
+const zip = new JSZip();
+
 // Selecciona el botón por su ID
 const boton = document.getElementById('runmodelbtn');
+
+let anonymizedText = '';
 
 // Evento para el botón de ejecutar modelo
 document.getElementById('runmodelbtn').addEventListener('click', async () => {
     const inputText = document.getElementById('input-text').value;
     const mode = document.getElementById('anonimization-mode').value;
     if (inputText) {
-        await runNER(inputText, mode);
+        await runNER(inputText, mode, 'input_text.txt');
+        document.getElementById('downloadSingleBtn').style.display = 'block';
     } else {
         alert('Por favor, ingrese algún texto.');
     }
 });
 
+// Event listener for the download single text button
+document.getElementById('downloadSingleBtn').addEventListener('click', () => {
+    generateSingleFile();
+});
+
+function generateSingleFile() {
+    const blob = new Blob([anonymizedText], { type: 'text/plain' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'anonymized_input_text.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 // Evento para el botón de subir archivo
 document.getElementById('uploadfilebtn').addEventListener('click', async () => {
     const fileInput = document.getElementById('file-input');
-    const file = fileInput.files[0];
+    const files = fileInput.files;
     const mode = document.getElementById('anonimization-mode').value;
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const inputText = e.target.result;
-            await runNER(inputText, mode);
-        };
-        reader.readAsText(file);
+    if (files.length > 0) {
+        document.getElementById('result').innerHTML = ''; // Clear previous results
+        for (let file of files) {
+            await processFile(file, mode);
+        }
+        // Show the download zip button after processing all files
+        document.getElementById('downloadZipBtn').style.display = 'block';
     } else {
-        alert('Por favor, suba un archivo.');
+        alert('Por favor, suba uno o más archivos.');
     }
 });
+
+// Function to process a single file
+async function processFile(file, mode) {
+    const reader = new FileReader();
+    const fileType = file.name.split('.').pop().toLowerCase();
+
+    if (fileType === 'txt') {
+        reader.onload = async (e) => {
+            const inputText = e.target.result;
+            await runNER(inputText, mode, file.name);
+        };
+        reader.readAsText(file);
+    } else if (fileType === 'docx') {
+        reader.onload = async (e) => {
+            const arrayBuffer = e.target.result;
+            mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+                .then(async (result) => {
+                    const inputText = result.value;
+                    await runNER(inputText, mode, file.name);
+                })
+                .catch((error) => {
+                    console.error('Error reading .docx file:', error);
+                    alert('Error leyendo el archivo .docx.');
+                });
+        };
+        reader.readAsArrayBuffer(file);
+    } else {
+        alert('Formato de archivo no soportado. Por favor, suba un archivo .txt o .docx.');
+    }
+}
 
 // Evento para el botón de limpiar resultados
 document.getElementById('clearResultsBtn').addEventListener('click', () => {
     document.getElementById('result').innerHTML = '';
     document.getElementById('input-text').value = '';
     document.getElementById('file-input').value = '';
+    document.getElementById('downloadZipBtn').style.display = 'none';
+    document.getElementById('downloadSingleBtn').style.display = 'none';
+    zip.remove('anonymized_files'); // Clear the zip contents
 });
 
 // Función para ejecutar el modelo NER
-// Función para ejecutar el modelo NER
-async function runNER(inputText, mode) {
+async function runNER(inputText, mode, filename = '') {
     const resultDiv = document.getElementById('result');
 
     if (!inputText) {
@@ -53,7 +107,7 @@ async function runNER(inputText, mode) {
         return;
     }
 
-    resultDiv.textContent = 'Analizando...';
+    resultDiv.innerHTML += `<p>Analizando ${filename}...</p>`;
 
     try {
         const segments = splitText(inputText);
@@ -68,9 +122,10 @@ async function runNER(inputText, mode) {
         }
         let replacedText = replacedTextLines.join('\n');
         replacedText = secondaryReplacements(replacedText, mode);
-        displayResults(replacedText, cleanedEntities);
+        anonymizedText = replacedText; // Store the anonymized text
+        displayResults(replacedText, cleanedEntities, filename);
     } catch (error) {
-        resultDiv.textContent = 'Error al procesar el texto: ' + error.message;
+        resultDiv.innerHTML += `<p>Error al procesar el texto ${filename}: ${error.message}</p>`;
     }
 }
 
@@ -162,7 +217,7 @@ function secondaryReplacements(text, mode) {
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
     const phoneRegex = /(?<!\d)(\d\s*){10}(?=\s|\n|$)/g;
     const idRegex = /(\d\s*\.?\s*){5,}(?=\s|\n|$)/g;
-    const dateRegex = /\b\d{2}[-/]\d{2}[-/]\d{4}\b/g; // Se puede separar en 2 para los formatos dd/mm/yyyy y dd-mm-yyyy
+    const dateRegex = /\b\d{1,2}[-/]\d{1,2}[-/]\d{2,4}\b/g; // Se puede separar en 2 para los formatos dd/mm/yyyy y dd-mm-yyyy
     //Ahora mismo se consideran formatos incorrectos como dd-mm/yyyy o dd/mm-yyyy, pero por ahora no se considera un problema al ser un caso demasiado específico
     
     let emailReplacement, phoneReplacement, idReplacement, dateReplacement;
@@ -171,47 +226,88 @@ function secondaryReplacements(text, mode) {
         emailReplacement = faker.internet.email();
         phoneReplacement = faker.helpers.fromRegExp('[0-9]{10}');
         idReplacement = faker.string.numeric({ length: { min: 5, max: 12 }, allowLeadingZeros: false });
-        dateReplacement = faker.number.int({ min: 1, max: 31 }) + '/' + faker.number.int({ min: 1, max: 12 }) + '/' + faker.number.int({ min: 1900, max: 2024 });
+        text = text.replace(dateRegex, (match) => shiftDate(match, 3710)); // Se desplazan las fechas 3710 dias hacia atrás
     } else {
         emailReplacement = '[email]';
         phoneReplacement = '[celular]'; 
         idReplacement = '[id]';
-        dateReplacement = '[fecha]';
+        text = text.replace(dateRegex, '[fecha]');
     }
     
     text = text.replace(emailRegex, emailReplacement);
     text = text.replace(phoneRegex, phoneReplacement); 
     text = text.replace(idRegex, idReplacement);
-    text = text.replace(dateRegex, dateReplacement);
     
     return text;
 }
 
-// Función para mostrar los resultados en la página
-function displayResults(replacedText, entities) {
+// Función para desplazar una fecha por un número dado de días
+function shiftDate(dateStr, days) {
+    const [day, month, year] = dateStr.split(/[-/]/).map(Number);
+    const date = new Date(year, month - 1, day);
+    date.setDate(date.getDate() - days);
+    const newDay = String(date.getDate()).padStart(2, '0');
+    const newMonth = String(date.getMonth() + 1).padStart(2, '0');
+    const newYear = date.getFullYear();
+    return `${newDay}-${newMonth}-${newYear}`;
+}
+
+// Function to display results on the page and add to zip
+function displayResults(replacedText, entities, filename = '') {
     const resultDiv = document.getElementById('result');
 
-    let output = `<h2>Texto anonimizado</h2><pre>${replacedText}</pre>`;
-    output += '<h2>Resultados del modelo</h2><ul>';
+    // Create a collapsible section for each file
+    let output = `
+    <div class="file-result">
+        <button class="collapsible">${filename ? `Archivo: ${filename}` : 'Resultado'}</button>
+        <div class="content">
+            <h2>Texto anonimizado</h2>
+            <pre>${replacedText}</pre>
+            <h2>Resultados del modelo</h2>
+            <ul>`;
 
     entities.forEach(entity => {
-        output += `<li><strong>Texto:</strong> ${entity.word}<br>`;
-        output += `<strong>Tipo:</strong> ${entity.entity}<br>`;
-        output += `<strong>Puntuación:</strong> ${entity.score.toFixed(4)}</li>`;
+        output += `<li><strong>Texto:</strong> ${entity.word}<br>
+            <strong>Tipo:</strong> ${entity.entity}<br>
+            <strong>Puntuación:</strong> ${entity.score.toFixed(4)}</li>`;
     });
 
-    output += '</ul>';
-    output += '<button id="downloadButton" class="btn btn-primary">Descargar Texto Anonimizado</button>';
+    output += `</ul>
+        </div>
+    </div>`;
 
-    resultDiv.innerHTML = output;
+    // Append the new output instead of overwriting
+    resultDiv.innerHTML += output;
 
-    document.getElementById('downloadButton').addEventListener('click', function() {
-        const blob = new Blob([replacedText], { type: 'text/plain' });
+    // Add the anonymized text to the zip file
+    zip.file(filename ? `${filename.split('.')[0]}_anonimizado.txt` : 'nota_anonimizada.txt', replacedText);
+
+    // Add event listener for collapsible sections
+    document.querySelectorAll('.collapsible').forEach(button => {
+        button.addEventListener('click', function() {
+            this.classList.toggle('active');
+            const content = this.nextElementSibling;
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                content.style.display = "block";
+            }
+        });
+    });
+}
+
+function generateZip() {
+    zip.generateAsync({ type: 'blob' }).then(function(content) {
         const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'nota_anonimizada.txt';
+        link.href = URL.createObjectURL(content);
+        link.download = 'anonymized_files.zip';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     });
 }
+
+// Event listener for the download zip button
+document.getElementById('downloadZipBtn').addEventListener('click', () => {
+    generateZip();
+});

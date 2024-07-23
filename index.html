@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Modelo de Anonimización</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
 </head>
 
 <body>
@@ -20,10 +21,12 @@
     </div>
     <button id="runmodelbtn">Analizar</button>
     <div>
-        <input type="file" id="file-input" />
+        <input type="file" id="file-input" multiple />
         <button id="uploadfilebtn">Subir y Analizar Archivo</button>
     </div>
     <div id="result"></div>
+    <button id="downloadZipBtn" class="btn btn-primary" style="display:none;">Descargar Archivos Anonimizados</button>
+    <button id="downloadSingleBtn" class="btn btn-primary" style="display:none;">Descargar Texto Anonimizado</button>
     <button id="clearResultsBtn" class="btn btn-secondary">Borrar Resultados</button>
     <script src="index.js" type="module"></script>
 </body>
