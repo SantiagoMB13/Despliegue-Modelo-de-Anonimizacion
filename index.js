@@ -226,13 +226,11 @@ function secondaryReplacements(text, mode) {
         emailReplacement = faker.internet.email();
         phoneReplacement = faker.helpers.fromRegExp('[0-9]{10}');
         idReplacement = faker.string.numeric({ length: { min: 5, max: 12 }, allowLeadingZeros: false });
-        text = text.replace(dateRegex, (match) => shiftDate(match, 3710)); // Se desplazan las fechas 3710 dias hacia atrás
-        text = text.replace(dateRegex, (match) => shiftDate(match, 3710)); // Se desplazan las fechas 3710 dias hacia atrás
+        text = text.replace(dateRegex, (match) => shiftDate(match, 3710));
     } else {
         emailReplacement = '[email]';
         phoneReplacement = '[celular]'; 
         idReplacement = '[id]';
-        text = text.replace(dateRegex, '[fecha]');
         text = text.replace(dateRegex, '[fecha]');
     }
     
