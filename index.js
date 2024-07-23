@@ -218,7 +218,6 @@ function secondaryReplacements(text, mode) {
     const phoneRegex = /(?<!\d)(\d\s*){10}(?=\s|\n|$)/g;
     const idRegex = /(\d\s*\.?\s*){5,}(?=\s|\n|$)/g;
     const dateRegex = /\b\d{1,2}[-/]\d{1,2}[-/]\d{2,4}\b/g; // Se puede separar en 2 para los formatos dd/mm/yyyy y dd-mm-yyyy
-    const dateRegex = /\b\d{1,2}[-/]\d{1,2}[-/]\d{2,4}\b/g; // Se puede separar en 2 para los formatos dd/mm/yyyy y dd-mm-yyyy
     //Ahora mismo se consideran formatos incorrectos como dd-mm/yyyy o dd/mm-yyyy, pero por ahora no se considera un problema al ser un caso demasiado específico
     
     let emailReplacement, phoneReplacement, idReplacement, dateReplacement;
