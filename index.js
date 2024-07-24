@@ -19,17 +19,37 @@ const boton = document.getElementById('runmodelbtn');
 let anonymizedText = '';
 let usingFile = false;
 
+// Muestra el popup
+function showPopup() {
+    var popup = document.getElementById('popup');
+    popup.style.display = 'flex'; // Cambia a 'flex' para mostrar el popup
+}
+
+// Esconde el popup
+function hidePopup() {
+    var popup = document.getElementById('popup');
+    popup.style.display = 'none'; // Cambia a 'none' para esconder el popup
+}
+
 // Evento para el label de subir archivos
 document.getElementById('file-input').addEventListener('change', function() {
     var fileInput = document.getElementById('file-input');
     var fileCount = document.getElementById('file-count');
-    
+    var analizebtn = document.getElementById('uploadfilebtn');
+    document.getElementById('downloadSingleBtn').style.display = 'none';
+
     if (fileInput.files.length === 0) {
         fileCount.textContent = 'No hay archivos seleccionados';
+        analizebtn.style.display = 'none';
+        usingFile = false;
     } else if (fileInput.files.length === 1) {
         fileCount.textContent = '1 archivo seleccionado';
+        analizebtn.style.display = 'inline-block';
+        usingFile = false;
     } else {
         fileCount.textContent = fileInput.files.length + ' archivos seleccionados';
+        analizebtn.style.display = 'inline-block';
+        usingFile = true;
     }
 });
 
@@ -61,22 +81,34 @@ function generateSingleFile() {
     document.body.removeChild(link);
 }
 
-// Evento para el botón de subir archivo
 document.getElementById('uploadfilebtn').addEventListener('click', async () => {
     const fileInput = document.getElementById('file-input');
     const files = fileInput.files;
     const mode = document.getElementById('anonimization-mode').value;
+
     if (files.length > 0) {
-        if (files.length > 1){
+        if (files.length > 1) {
             usingFile = true;
         }
+
         document.getElementById('result').innerHTML = ''; // Clear previous results
         zip = new JSZip(); // Reinitialize JSZip to clear previous files
-        for (let file of files) {
-            await processFile(file, mode);
+        showPopup(); // Mostrar el popup de carga
+
+        // Crear un array de promesas
+        const fileProcessingPromises = Array.from(files).map(file => processFile(file, mode));
+
+        try {
+            // Esperar a que todas las promesas se resuelvan
+            await Promise.all(fileProcessingPromises); // Esperar a que todas las promesas se resuelvan
+            
+            // Mostrar el botón de descarga del zip
+            document.getElementById('downloadZipBtn').style.display = 'block';
+        } catch (error) {
+            console.error('Error procesando archivos:', error);
+        } finally {
+            hidePopup(); // Esconder el popup de carga
         }
-        // Show the download zip button after processing all files
-        document.getElementById('downloadZipBtn').style.display = 'block';
     } else {
         alert('Por favor, suba uno o más archivos.');
     }
@@ -87,36 +119,55 @@ async function processFile(file, mode) {
     const reader = new FileReader();
     const fileType = file.name.split('.').pop().toLowerCase();
 
-    if (fileType === 'txt') {
-        reader.onload = async (e) => {
-            const inputText = e.target.result;
-            await runNER(inputText, mode, file.name);
-        };
-        reader.readAsText(file);
-    } else if (fileType === 'docx') {
-        reader.onload = async (e) => {
-            const arrayBuffer = e.target.result;
-            mammoth.extractRawText({ arrayBuffer: arrayBuffer })
-                .then(async (result) => {
-                    const inputText = result.value;
+    return new Promise((resolve, reject) => {
+        if (fileType === 'txt') {
+            reader.onload = async (e) => {
+                const inputText = e.target.result;
+                try {
                     await runNER(inputText, mode, file.name);
-                })
-                .catch((error) => {
-                    console.error('Error reading .docx file:', error);
-                    alert('Error leyendo el archivo .docx.');
-                });
-        };
-        reader.readAsArrayBuffer(file);
-    } else if (fileType === 'pdf') {
-        reader.onload = async (e) => {
-            const arrayBuffer = e.target.result;
-            const inputText = await extractTextFromPDF(arrayBuffer);
-            await runNER(inputText, mode, file.name);
-        };
-        reader.readAsArrayBuffer(file);
-    } else {
-        alert('Formato de archivo no soportado. Por favor, suba un archivo .txt, .docx o .pdf.');
-    }
+                    resolve(); // Resolver la promesa cuando el procesamiento esté completo
+                } catch (error) {
+                    reject(error); // Rechazar la promesa en caso de error
+                }
+            };
+            reader.readAsText(file);
+        } else if (fileType === 'docx') {
+            reader.onload = async (e) => {
+                const arrayBuffer = e.target.result;
+                mammoth.extractRawText({ arrayBuffer: arrayBuffer })
+                    .then(async (result) => {
+                        const inputText = result.value;
+                        try {
+                            await runNER(inputText, mode, file.name);
+                            resolve(); // Resolver la promesa cuando el procesamiento esté completo
+                        } catch (error) {
+                            reject(error); // Rechazar la promesa en caso de error
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error reading .docx file:', error);
+                        alert('Error leyendo el archivo .docx.');
+                        reject(error); // Rechazar la promesa en caso de error
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        } else if (fileType === 'pdf') {
+            reader.onload = async (e) => {
+                const arrayBuffer = e.target.result;
+                try {
+                    const inputText = await extractTextFromPDF(arrayBuffer);
+                    await runNER(inputText, mode, file.name);
+                    resolve(); // Resolver la promesa cuando el procesamiento esté completo
+                } catch (error) {
+                    reject(error); // Rechazar la promesa en caso de error
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            alert('Formato de archivo no soportado. Por favor, suba un archivo .txt, .docx o .pdf.');
+            reject(new Error('Formato de archivo no soportado'));
+        }
+    });
 }
 
 async function extractTextFromPDF(arrayBuffer) {
@@ -178,7 +229,7 @@ async function runNER(inputText, mode, filename = '') {
             document.getElementById('downloadSingleBtn').style.display = 'block';
             document.getElementById('downloadZipBtn').style.display = 'none';
         }
-        
+
     } catch (error) {
         resultDiv.innerHTML += `<p>Error al procesar el texto ${filename}: ${error.message}</p>`;
     }
@@ -352,7 +403,6 @@ function displayResults(originalText, replacedText, filename = '') {
         button.addEventListener('click', function() {
             this.classList.toggle('active');
             const content = this.nextElementSibling;
-            console.log(content.style.display);
             if (content.style.display === "flex") {
                 content.style.display = "none";
             } else {

@@ -189,4 +189,24 @@ label[for="file-input"]:hover {
 
 #uploadfilebtn{
     margin-left: 50px;
+    display: none;
+}
+
+.popup {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(155, 153, 153, 0.8); /* Fondo semi-transparente */
+    z-index: 1000; /* Asegura que el popup esté al frente */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 25px;
+}
+
+.popup img {
+    width: 300px; /* Ajusta el tamaño del GIF según sea necesario */
 }
