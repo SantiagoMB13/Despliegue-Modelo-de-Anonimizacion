@@ -110,6 +110,7 @@ pre {
     white-space: pre-wrap; /* Permite el ajuste de línea */
     overflow-x: auto; /* Barra de desplazamiento horizontal si es necesario */
     margin-bottom: 20px; /* Espaciado inferior */
+    word-wrap: break-word;
 }
 
 pre code {
@@ -145,4 +146,47 @@ pre code {
 
 .file-result {
     margin-bottom: 20px;
+}
+
+.result-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.text-container {
+    width: 48%;
+}
+
+/* Ocultar el input original */
+input[type="file"] {
+    display: none;
+}
+
+/* Crear un estilo para el label que actuará como el botón */
+label[for="file-input"] {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #5c6bc0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 10px 0;
+}
+
+/* Estilo para el hover */
+label[for="file-input"]:hover {
+    background-color: #3f51b5;
+}
+
+/* Estilo para el texto que muestra el número de archivos subidos */
+#file-count {
+    margin-left: 10px;
+    font-size: 16px;
+}
+
+#uploadfilebtn{
+    margin-left: 50px;
 }

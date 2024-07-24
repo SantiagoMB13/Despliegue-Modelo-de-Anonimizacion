@@ -17,13 +17,29 @@ let zip = new JSZip();
 const boton = document.getElementById('runmodelbtn');
 
 let anonymizedText = '';
+let usingFile = false;
+
+// Evento para el label de subir archivos
+document.getElementById('file-input').addEventListener('change', function() {
+    var fileInput = document.getElementById('file-input');
+    var fileCount = document.getElementById('file-count');
+    
+    if (fileInput.files.length === 0) {
+        fileCount.textContent = 'No hay archivos seleccionados';
+    } else if (fileInput.files.length === 1) {
+        fileCount.textContent = '1 archivo seleccionado';
+    } else {
+        fileCount.textContent = fileInput.files.length + ' archivos seleccionados';
+    }
+});
 
 // Evento para el botón de ejecutar modelo
 document.getElementById('runmodelbtn').addEventListener('click', async () => {
     const inputText = document.getElementById('input-text').value;
     const mode = document.getElementById('anonimization-mode').value;
     if (inputText) {
-        await runNER(inputText, mode, 'input_text.txt');
+        usingFile = false;
+        await runNER(inputText, mode, 'texto ingresado');
         document.getElementById('downloadSingleBtn').style.display = 'block';
     } else {
         alert('Por favor, ingrese algún texto.');
@@ -51,6 +67,9 @@ document.getElementById('uploadfilebtn').addEventListener('click', async () => {
     const files = fileInput.files;
     const mode = document.getElementById('anonimization-mode').value;
     if (files.length > 0) {
+        if (files.length > 1){
+            usingFile = true;
+        }
         document.getElementById('result').innerHTML = ''; // Clear previous results
         zip = new JSZip(); // Reinitialize JSZip to clear previous files
         for (let file of files) {
@@ -122,6 +141,7 @@ document.getElementById('clearResultsBtn').addEventListener('click', () => {
     document.getElementById('downloadZipBtn').style.display = 'none';
     document.getElementById('downloadSingleBtn').style.display = 'none';
     zip = new JSZip(); // Reinitialize JSZip to clear previous files
+    usingFile = false;
 });
 
 // Función para ejecutar el modelo NER
@@ -133,7 +153,8 @@ async function runNER(inputText, mode, filename = '') {
         return;
     }
 
-    resultDiv.innerHTML += `<p>Analizando ${filename}...</p>`;
+    resultDiv.innerHTML += `<p id="file-${filename}">Analizando ${filename}...</p>`;
+    var loadinglabel = document.getElementById(`file-${filename}`);
 
     try {
         const segments = splitText(inputText);
@@ -149,7 +170,8 @@ async function runNER(inputText, mode, filename = '') {
         let replacedText = replacedTextLines.join('\n');
         replacedText = secondaryReplacements(replacedText, mode);
         anonymizedText = replacedText; // Store the anonymized text
-        displayResults(replacedText, cleanedEntities, filename);
+        loadinglabel.parentNode.removeChild(loadinglabel); // Eliminar el mensaje de carga
+        displayResults(inputText, replacedText, filename);
         
         // If only one file is processed, enable the single file download
         if (filename && document.getElementById('file-input').files.length === 1) {
@@ -286,31 +308,41 @@ function shiftDate(dateStr, days) {
 }
 
 // Function to display results on the page and add to zip
-function displayResults(replacedText, entities, filename = '') {
+function displayResults(originalText, replacedText, filename = '') {
     const resultDiv = document.getElementById('result');
 
-    // Create a collapsible section for each file
-    let output = `
-    <div class="file-result">
-        <button class="collapsible">${filename ? `Archivo: ${filename}` : 'Resultado'}</button>
-        <div class="content">
-            <h2>Texto anonimizado</h2>
-            <pre>${replacedText}</pre>
-            <h2>Resultados del modelo</h2>
-            <ul>`;
+    // Crear el contenedor para mostrar los textos lado a lado
+    const container = document.createElement('div');
+    container.className = 'result-container';
 
-    entities.forEach(entity => {
-        output += `<li><strong>Texto:</strong> ${entity.word}<br>
-            <strong>Tipo:</strong> ${entity.entity}<br>
-            <strong>Puntuación:</strong> ${entity.score.toFixed(4)}</li>`;
-    });
+    // Crear el contenedor para el texto original
+    const originalContainer = document.createElement('div');
+    originalContainer.className = 'text-container';
+    originalContainer.innerHTML = '<h3>Texto Original</h3><pre>' + originalText + '</pre>';
 
-    output += `</ul>
-        </div>
-    </div>`;
+    // Crear el contenedor para el texto anonimizado
+    const anonymizedContainer = document.createElement('div');
+    anonymizedContainer.className = 'text-container';
+    anonymizedContainer.innerHTML = '<h3>Texto Anonimizado</h3><pre>' + replacedText + '</pre>';
 
-    // Append the new output instead of overwriting
-    resultDiv.innerHTML += output;
+    // Añadir los contenedores al contenedor principal
+    container.appendChild(originalContainer);
+    container.appendChild(anonymizedContainer);
+
+    // Añadir el contenedor principal al div de resultados
+    if (usingFile == true) {
+        container.style.display = 'none';
+        const fileresult = document.createElement('div');
+        fileresult.className = 'file-result';
+        const displaybtn = document.createElement('button');
+        displaybtn.className = 'collapsible';
+        displaybtn.innerHTML = filename ? `Archivo: ${filename}` : 'Nota clínica';
+        fileresult.appendChild(displaybtn);
+        fileresult.appendChild(container);
+        resultDiv.appendChild(fileresult);
+    } else {
+        resultDiv.appendChild(container);
+    }
 
     // Add the anonymized text to the zip file
     zip.file(filename ? `${filename.split('.')[0]}_anonimizado.txt` : 'nota_anonimizada.txt', replacedText);
@@ -320,10 +352,11 @@ function displayResults(replacedText, entities, filename = '') {
         button.addEventListener('click', function() {
             this.classList.toggle('active');
             const content = this.nextElementSibling;
-            if (content.style.display === "block") {
+            console.log(content.style.display);
+            if (content.style.display === "flex") {
                 content.style.display = "none";
             } else {
-                content.style.display = "block";
+                content.style.display = "flex";
             }
         });
     });
