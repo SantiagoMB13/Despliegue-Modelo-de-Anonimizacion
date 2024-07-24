@@ -178,11 +178,25 @@ async function extractTextFromPDF(arrayBuffer) {
     for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items.map(item => item.str).join(' ');
+        let pageText = '';
+
+        textContent.items.forEach((item, index) => {
+            pageText += item.str;
+            // Si el siguiente item está en una posición mucho más baja, considera que es un salto de línea
+            if (index < textContent.items.length - 1) {
+                const currentY = item.transform[5];
+                const nextY = textContent.items[index + 1].transform[5];
+                if (Math.abs(currentY - nextY) > 10) { // Ajusta este umbral según sea necesario
+                    pageText += '\n';
+                }
+            }
+        });
+
         text += pageText + '\n';
     }
     return text;
 }
+
 
 // Evento para el botón de limpiar resultados
 document.getElementById('clearResultsBtn').addEventListener('click', () => {
