@@ -119,7 +119,7 @@ pre code {
 
 /* Style the collapsible button */
 .collapsible {
-    background-color: #777;
+    background-color: #3f51b5;
     color: white;
     cursor: pointer;
     padding: 10px;
@@ -133,7 +133,7 @@ pre code {
 
 /* Style the active (open) state */
 .active, .collapsible:hover {
-    background-color: #555;
+    background-color: #28378a;
 }
 
 /* Style the collapsible content */
