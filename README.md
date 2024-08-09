@@ -25,10 +25,10 @@ El propósito de este proyecto es proporcionar una herramienta fácil de usar pa
 
 ## 📦 Instalación y Ejecución
 
-- **Para usar esta herramienta en la nube:**
+**Para usar esta herramienta en la nube:**
    https://modelo-de-anonimizacion.vercel.app/
 
-- **Para usar esta herramienta en tu entorno local**:
+**Para usar esta herramienta en tu entorno local**:
 
 1. **Clona el repositorio**:
    ```bash
