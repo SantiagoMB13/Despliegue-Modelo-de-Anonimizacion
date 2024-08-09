@@ -37,7 +37,7 @@ document.getElementById('file-input').addEventListener('change', function() {
     var fileCount = document.getElementById('file-count');
     var analizebtn = document.getElementById('uploadfilebtn');
     document.getElementById('downloadSingleBtn').style.display = 'none';
-
+    usedFilenames.clear(); // Clear the processed filenames set
     if (fileInput.files.length === 0) {
         fileCount.textContent = 'No hay archivos seleccionados';
         analizebtn.style.display = 'none';
@@ -114,20 +114,36 @@ document.getElementById('uploadfilebtn').addEventListener('click', async () => {
     }
 });
 
+let usedFilenames = new Set(); // Set to keep track of used filenames
 // Function to process a single file
 async function processFile(file, mode) {
     const reader = new FileReader();
     const fileType = file.name.split('.').pop().toLowerCase();
+
+    // Strip the extension and use the base name
+    let baseName = file.name.split('.').slice(0, -1).join('.');
+    let uniqueName = baseName;
+    let counter = 1;
+
+    // Ensure unique filenames across all files
+    while (usedFilenames.has(`${uniqueName}_anonimizado.txt`)) {
+        uniqueName = `${baseName}(${counter})`;
+        counter++;
+    }
+    const finalFileName = `${uniqueName}_anonimizado.txt`;
+
+    // Add the final filename to the set to track it
+    usedFilenames.add(finalFileName);
 
     return new Promise((resolve, reject) => {
         if (fileType === 'txt') {
             reader.onload = async (e) => {
                 const inputText = e.target.result;
                 try {
-                    await runNER(inputText, mode, file.name);
-                    resolve(); // Resolver la promesa cuando el procesamiento esté completo
+                    await runNER(inputText, mode, finalFileName);
+                    resolve(); // Resolve the promise when processing is complete
                 } catch (error) {
-                    reject(error); // Rechazar la promesa en caso de error
+                    reject(error); // Reject the promise in case of error
                 }
             };
             reader.readAsText(file);
@@ -138,16 +154,16 @@ async function processFile(file, mode) {
                     .then(async (result) => {
                         const inputText = result.value;
                         try {
-                            await runNER(inputText, mode, file.name);
-                            resolve(); // Resolver la promesa cuando el procesamiento esté completo
+                            await runNER(inputText, mode, finalFileName);
+                            resolve(); // Resolve the promise when processing is complete
                         } catch (error) {
-                            reject(error); // Rechazar la promesa en caso de error
+                            reject(error); // Reject the promise in case of error
                         }
                     })
                     .catch((error) => {
                         console.error('Error reading .docx file:', error);
                         alert('Error leyendo el archivo .docx.');
-                        reject(error); // Rechazar la promesa en caso de error
+                        reject(error); // Reject the promise in case of error
                     });
             };
             reader.readAsArrayBuffer(file);
@@ -156,10 +172,10 @@ async function processFile(file, mode) {
                 const arrayBuffer = e.target.result;
                 try {
                     const inputText = await extractTextFromPDF(arrayBuffer);
-                    await runNER(inputText, mode, file.name);
-                    resolve(); // Resolver la promesa cuando el procesamiento esté completo
+                    await runNER(inputText, mode, finalFileName);
+                    resolve(); // Resolve the promise when processing is complete
                 } catch (error) {
-                    reject(error); // Rechazar la promesa en caso de error
+                    reject(error); // Reject the promise in case of error
                 }
             };
             reader.readAsArrayBuffer(file);
@@ -206,6 +222,7 @@ document.getElementById('clearResultsBtn').addEventListener('click', () => {
     document.getElementById('downloadZipBtn').style.display = 'none';
     document.getElementById('downloadSingleBtn').style.display = 'none';
     zip = new JSZip(); // Reinitialize JSZip to clear previous files
+    usedFilenames.clear(); // Clear the processed filenames set
     usingFile = false;
 });
 
@@ -376,25 +393,25 @@ function shiftDate(dateStr, days) {
 function displayResults(originalText, replacedText, filename = '') {
     const resultDiv = document.getElementById('result');
 
-    // Crear el contenedor para mostrar los textos lado a lado
+    // Create the container to display texts side by side
     const container = document.createElement('div');
     container.className = 'result-container';
 
-    // Crear el contenedor para el texto original
+    // Create the container for the original text
     const originalContainer = document.createElement('div');
     originalContainer.className = 'text-container';
     originalContainer.innerHTML = '<h3>Texto Original</h3><pre>' + originalText + '</pre>';
 
-    // Crear el contenedor para el texto anonimizado
+    // Create the container for the anonymized text
     const anonymizedContainer = document.createElement('div');
     anonymizedContainer.className = 'text-container';
     anonymizedContainer.innerHTML = '<h3>Texto Anonimizado</h3><pre>' + replacedText + '</pre>';
 
-    // Añadir los contenedores al contenedor principal
+    // Add the containers to the main container
     container.appendChild(originalContainer);
     container.appendChild(anonymizedContainer);
 
-    // Añadir el contenedor principal al div de resultados
+    // Add the main container to the results div
     if (usingFile == true) {
         container.style.display = 'none';
         const fileresult = document.createElement('div');
@@ -410,7 +427,7 @@ function displayResults(originalText, replacedText, filename = '') {
     }
 
     // Add the anonymized text to the zip file
-    zip.file(filename ? `${filename.split('.')[0]}_anonimizado.txt` : 'nota_anonimizada.txt', replacedText);
+    zip.file(filename, replacedText);
 
     // Add event listener for collapsible sections
     document.querySelectorAll('.collapsible').forEach(button => {
@@ -426,6 +443,7 @@ function displayResults(originalText, replacedText, filename = '') {
     });
 }
 
+
 function generateZip() {
     zip.generateAsync({ type: 'blob' }).then(function(content) {
         const link = document.createElement('a');
@@ -434,6 +452,9 @@ function generateZip() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+
+        // Clear the processed filenames set after the zip is generated
+        usedFilenames.clear();
     });
 }
 
