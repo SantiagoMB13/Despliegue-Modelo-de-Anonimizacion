@@ -32,10 +32,10 @@ El propósito de este proyecto es proporcionar una herramienta fácil de usar pa
 
 1. **Clona el repositorio**:
    ```bash
-   git clone https://github.com/tuusuario/nombre-del-repositorio.git
+   git clone https://github.com/SantiagoMB13/Despliegue-Modelo-de-Anonimizacion.git
 2. **Navega a la carpeta del proyecto**:
     ```bash
-    cd nombre-del-repositorio
+    cd Despliegue-Modelo-de-Anonimizacion
 3. **Despliega el programa en un servidor local**:
    ```bash
    python -m http.server
