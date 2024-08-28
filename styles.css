@@ -33,7 +33,7 @@ button {
     color: #fff;
     background-color: #5c6bc0;
     border: none;
-    border-radius: 5px;
+    border-radius: 50px;
     cursor: pointer;
     transition: background-color 0.3s;
     margin: 10px 0;
@@ -49,7 +49,7 @@ button:hover {
     padding: 20px;
     background-color: #fff;
     border: 1px solid #ddd;
-    border-radius: 5px;
+    border-radius: 50px;
 }
 
 /* Subtitles */
@@ -170,7 +170,7 @@ label[for="file-input"] {
     color: #fff;
     background-color: #5c6bc0;
     border: none;
-    border-radius: 5px;
+    border-radius: 50px;
     cursor: pointer;
     transition: background-color 0.3s;
     margin: 10px 0;
