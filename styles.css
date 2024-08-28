@@ -12,11 +12,12 @@ h1 {
     color: #5c6bc0;
     text-align: center;
     margin-bottom: 20px;
+    font-size: 40px;
 }
 
 /* Textarea */
 textarea {
-    width: 100%;
+    width: calc(100% - 20px);
     height: 150px;
     padding: 10px;
     border: 1px solid #ddd;
@@ -97,6 +98,8 @@ select {
     margin-bottom: 10px;
     border-radius: 5px;
     padding: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 pre {
@@ -135,7 +138,9 @@ pre code {
 .active, .collapsible:hover {
     background-color: #28378a;
 }
-
+select:hover{
+    background-color: #28378a;
+}
 /* Style the collapsible content */
 .content {
     padding: 0 18px;
