@@ -55,8 +55,7 @@ document.getElementById('file-input').addEventListener('change', function() {
 
 // Evento para el botón de ejecutar modelo
 document.getElementById('runmodelbtn').addEventListener('click', async () => {
-    usedFilenames.clear();
-    usedFiletypes.clear(); 
+    clearCache();
     const inputText = document.getElementById('input-text').value;
     const mode = document.getElementById('anonimization-mode').value;
     if (inputText) {
@@ -142,6 +141,7 @@ async function generateSingleFile() {
 }
 
 document.getElementById('uploadfilebtn').addEventListener('click', async () => {
+    clearCache();
     const fileInput = document.getElementById('file-input');
     const files = fileInput.files;
     const mode = document.getElementById('anonimization-mode').value;
@@ -286,16 +286,24 @@ async function extractTextFromPDF(arrayBuffer) {
 
 // Evento para el botón de limpiar resultados
 document.getElementById('clearResultsBtn').addEventListener('click', () => {
+    clearCache();
+    clearData();
+});
+
+function clearCache(){
     document.getElementById('result').innerHTML = '';
-    document.getElementById('input-text').value = '';
-    document.getElementById('file-input').value = '';
     document.getElementById('downloadZipBtn').style.display = 'none';
     document.getElementById('downloadSingleBtn').style.display = 'none';
     zip = new JSZip(); // Reinitialize JSZip to clear previous files
     usedFilenames.clear(); // Clear the processed filenames set
     usedFiletypes.clear(); // Clear the processed filetypes set
+}
+
+function clearData() { 
+    document.getElementById('input-text').value = '';
+    document.getElementById('file-input').value = '';
     usingFile = false;
-});
+}
 
 // Función para ejecutar el modelo NER
 async function runNER(inputText, mode, filename = '') {
