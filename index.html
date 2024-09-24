@@ -1,44 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Modelo de Anonimización</title>
+    <title>SafeRecords</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.all.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.png" type="images/png">
 </head>
-
-<body>
-    <div id="popup" class="popup">
-        <div>
-            <img src="assets/working.gif" alt="Loading...">
-            <p><b>Analizando los registros médicos...</b></p>
+<body class="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 py-12 px-4 sm:px-6 lg:px-8">
+    <div id="popup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800 mx-auto mb-4"></div>
+            <p class="text-xl font-semibold">Analizando los registros médicos...</p>
         </div>
     </div>
-    <h1>Modelo de Anonimización</h1>
-    <textarea id="input-text" placeholder="Ingrese su texto aquí..."></textarea>
-    <div>
-        <label for="anonimization-mode">Modo de Anonimización:</label>
-        <select id="anonimization-mode">
-            <option value="generic">Genérico</option>
-            <option value="advanced">Avanzado</option>
-        </select>
-    </div>
-    <button id="runmodelbtn">Analizar</button>
-    <div>
-        <input type="file" id="file-input" multiple />
-        <label for="file-input">Subir archivos</label>
-        <span id="file-count">No hay archivos seleccionados</span>
-        <button id="uploadfilebtn">Analizar Archivos</button>
-    </div>
-    <div id="result"></div>
-    <button id="downloadZipBtn" class="btn btn-primary" style="display:none;">Descargar Archivos Anonimizados</button>
-    <button id="downloadSingleBtn" class="btn btn-primary" style="display:none;">Descargar Texto Anonimizado</button>
-    <button id="clearResultsBtn" class="btn btn-secondary">Borrar Resultados</button>
-    <script src="index.js" type="module"></script>
-</head>
-</body>
 
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+            <svg class="inline-block w-16 h-16 text-gray-800 mb-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            <h1 class="text-4xl font-bold text-gray-900">SafeRecords</h1>
+            <p class="mt-2 text-xl text-gray-600">Proteja la privacidad de sus datos con nuestro avanzado sistema de anonimización</p>
+        </div>
+        
+        <div class="bg-white bg-opacity-80 backdrop-filter backdrop-blur-sm shadow-2xl rounded-xl p-8 transition-all hover:shadow-3xl">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Panel de Control</h2>
+            
+            <div class="space-y-6">
+                <div class="relative group">
+                    <textarea id="input-text" placeholder="Ingrese su texto aquí..." class="w-full min-h-[150px] p-3 border rounded-md focus:ring-2 focus:ring-gray-500 transition-all"></textarea>
+                    <svg class="absolute right-3 top-3 h-5 w-5 text-gray-400 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+
+                <div class="space-y-2">
+                    <input type="file" id="file-input" multiple class="hidden" />
+                    <div class="flex items-center space-x-4">
+                        <label for="file-input" class="cursor-pointer bg-white text-gray-800 px-4 py-2 rounded-md border border-gray-800 hover:bg-gray-100 transition-colors group">
+                            <svg class="inline-block mr-2 h-5 w-5 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                            </svg>
+                            Subir archivos
+                        </label>
+                        <span id="file-count" class="text-sm text-gray-500">No hay archivos seleccionados</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <select id="anonimization-mode" class="w-[180px] p-2 border rounded-md">
+                        <option value="generic">Genérico</option>
+                        <option value="advanced">Avanzado</option>
+                    </select>
+                    <button id="runmodelbtn" class="flex-grow bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors group">
+                        <svg class="inline-block mr-2 h-5 w-5 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+                        </svg>
+                        Analizar
+                    </button>
+                </div>
+
+                <div id="loading-indicator" class="hidden flex items-center justify-center p-4 bg-gray-100 rounded-md">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-gray-800 font-semibold">Anonimizando datos...</span>
+                </div>
+
+                <div id="result" class="mt-6 p-4 bg-white border rounded-md shadow-inner hidden">
+                    <h3 class="font-semibold mb-2 flex items-center">
+                        <svg class="mr-2 h-5 w-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                        Resultados:
+                    </h3>
+                    <div id="result-content"></div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-between gap-4">
+                    <button id="downloadZipBtn" class="hidden w-full sm:w-auto bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors group">
+                        <svg class="inline-block mr-2 h-5 w-5 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Descargar Archivos Anonimizados
+                    </button>
+                    <button id="downloadSingleBtn" class="hidden w-full sm:w-auto bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors group">
+                        <svg class="inline-block mr-2 h-5 w-5 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Descargar Texto Anonimizado
+                    </button>
+                    <button id="clearResultsBtn" class="hidden w-full sm:w-auto bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors group">
+                        <svg class="inline-block mr-2 h-5 w-5 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Borrar Resultados
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js" type="module"></script>
+</body>
 </html>

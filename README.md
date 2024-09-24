@@ -1,4 +1,4 @@
-# 🛡️ Proyecto de Anonimización de Registros Médicos
+# 🛡️ SafeRecords
 
 Este proyecto es una solución completa para la **anonimización de registros médicos** directamente en el navegador. Utiliza modelos de inteligencia artificial para identificar y anonimizar automáticamente información sensible en textos, asegurando la privacidad de los datos médicos pero manteniendo la coherencia de forma que la información se mantiene relevante.
 

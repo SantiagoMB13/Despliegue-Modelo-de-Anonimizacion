@@ -1,217 +1,111 @@
-/* General styles */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 20px;
-    color: #333;
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+.group:hover .group-hover\:animate-bounce {
+    animation: bounce 1s infinite;
+}
+.transition-all {
+    transition: all 0.3s ease;
 }
 
-/* Header */
-h1 {
-    color: #5c6bc0;
-    text-align: center;
-    margin-bottom: 20px;
-    font-size: 40px;
-}
-
-/* Textarea */
-textarea {
-    width: calc(100% - 20px);
-    height: 150px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    font-size: 16px;
-}
-
-/* Button */
-button {
-    display: inline-block;
-    padding: 10px 20px;
-    font-size: 16px;
-    color: #fff;
-    background-color: #5c6bc0;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin: 10px 0;
-}
-
-button:hover {
-    background-color: #3f51b5;
-}
-
-/* Results section */
-#result {
-    margin-top: 20px;
-    padding: 20px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 50px;
-}
-
-/* Subtitles */
-h2 {
-    color: #3f51b5;
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-/* Lists */
-ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-li {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-}
-
-li:last-child {
-    border-bottom: none;
-}
-
-strong {
-    color: #333;
-}
-
-/* Responsive design */
-@media (max-width: 600px) {
-    button {
-        width: 100%;
-        font-size: 14px;
-    }
-
-    textarea {
-        height: 120px;
-    }
-}
-
-select {
-    background-color: #3f51b5;
-    color: white;
-    margin-top: 20px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    padding: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-pre {
-    background-color: #f8f9fa; /* Color de fondo suave */
-    padding: 15px; /* Espaciado interno */
-    border: 1px solid #ddd; /* Borde */
-    border-radius: 5px; /* Bordes redondeados */
-    font-family: 'Courier New', Courier, monospace; /* Fuente monoespaciada */
-    font-size: 14px; /* Tamaño de fuente */
-    line-height: 1.6; /* Altura de línea */
-    white-space: pre-wrap; /* Permite el ajuste de línea */
-    overflow-x: auto; /* Barra de desplazamiento horizontal si es necesario */
-    margin-bottom: 20px; /* Espaciado inferior */
-    word-wrap: break-word;
-}
-
-pre code {
-    display: block;
-}
-
-/* Style the collapsible button */
-.collapsible {
-    background-color: #3f51b5;
-    color: white;
-    cursor: pointer;
-    padding: 10px;
-    width: 100%;
-    border: none;
-    text-align: left;
-    outline: none;
-    font-size: 15px;
-    margin-top: 10px;
-}
-
-/* Style the active (open) state */
-.active, .collapsible:hover {
-    background-color: #28378a;
-}
-select:hover{
-    background-color: #28378a;
-}
-/* Style the collapsible content */
-.content {
-    padding: 0 18px;
-    display: none;
-    overflow: hidden;
-    background-color: #f1f1f1;
-}
-
-.file-result {
-    margin-bottom: 20px;
-}
-
+/* Estilos para elementos dinámicos */
 .result-container {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
 }
-
 .text-container {
-    width: 48%;
+    flex: 1 1 calc(50% - 0.5rem);
+    min-width: 300px;
+    background-color: #f3f4f6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
-
-/* Ocultar el input original */
-input[type="file"] {
-    display: none;
+.text-container h3 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #1f2937;
 }
-
-/* Crear un estilo para el label que actuará como el botón */
-label[for="file-input"] {
-    display: inline-block;
-    padding: 10px 20px;
-    font-size: 16px;
-    color: #fff;
-    background-color: #5c6bc0;
-    border: none;
-    border-radius: 50px;
+.text-container pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #4b5563;
+    max-height: 300px;
+    overflow-y: auto;
+}
+.file-result {
+    margin-top: 1rem;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+.collapsible {
+    background-color: #f3f4f6;
+    color: #1f2937;
     cursor: pointer;
-    transition: background-color 0.3s;
-    margin: 10px 0;
-}
-
-/* Estilo para el hover */
-label[for="file-input"]:hover {
-    background-color: #3f51b5;
-}
-
-/* Estilo para el texto que muestra el número de archivos subidos */
-#file-count {
-    margin-left: 10px;
-    font-size: 16px;
-}
-
-#uploadfilebtn{
-    margin-left: 50px;
-    display: none;
-}
-
-.popup {
-    display: none; /* Oculto por defecto */
-    position: fixed;
-    top: 0;
-    left: 0;
+    padding: 1rem;
     width: 100%;
-    height: 100%;
-    background: rgba(155, 153, 153, 0.8); /* Fondo semi-transparente */
-    z-index: 1000; /* Asegura que el popup esté al frente */
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    font-size: 25px;
+    text-align: left;
+    font-weight: 600;
+    border: none;
+    outline: none;
+    transition: 0.4s;
+}
+.collapsible:hover {
+    background-color: #e5e7eb;
+}
+.collapsible:after {
+    content: '\002B';
+    color: #6b7280;
+    font-weight: bold;
+    float: right;
+    margin-left: 5px;
+}
+.collapsible.active:after {
+    content: "\2212";
+}
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+    background-color: white;
+}
+.collapsible-content.active {
+    max-height: 1000px;
 }
 
-.popup img {
-    width: 300px; /* Ajusta el tamaño del GIF según sea necesario */
+#clearResultsBtn {
+    background-color: tomato;
+}
+
+.text-container textarea {
+    width: 100%;
+    height: 300px;
+    border: none;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 14px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #4b5563;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-y: auto;
+    background-color: transparent;
+}
+.text-container textarea {
+    resize: none;
 }
