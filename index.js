@@ -162,7 +162,7 @@ async function generateSingleFile() {
         }
         link.download = filename;
     } else {
-        const blob = new Blob([anonymizedText], { type: 'text/plain' });
+        const blob = new Blob([textareaContent], { type: 'text/plain' });
         link.href = URL.createObjectURL(blob);
         link.download = 'anonymized_text.txt';
     }
