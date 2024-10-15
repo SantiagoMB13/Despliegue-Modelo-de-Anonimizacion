@@ -54,21 +54,17 @@ El propósito de este proyecto es proporcionar una herramienta fácil de usar pa
 
 ## ⚙️ Requisitos
 
-No se necesitan dependencias adicionales. Todo se carga a través de CDN en el navegador.
+No se necesitan dependencias adicionales. Todo se carga a través de CDN en el navegador. Sin embargo, si quieres desplegarla localmente en un contenedor debes tener Docker instalado en tu equipo.
 
 ## 👨‍💻 Uso
 
-### 1. Anonimización de Texto
+### Anonimización de Texto y Archivos
    - Ingresa o pega el texto en el campo de texto.
-   - Selecciona el modo de anonimización: **Genérico** o **Avanzado**.
-   - Haz clic en **"Anonimizar Texto"**.
-   - Descarga el archivo anonimizado.
-
-### 2. Anonimización de Archivos
    - Sube uno o más archivos (.txt, .pdf, .docx).
-   - Selecciona el modo de anonimización.
-   - Haz clic en **"Procesar Archivos"**.
-   - Descarga el archivo o archivos anonimizados individualmente o como un archivo ZIP.
+   - Selecciona el modo de anonimización: **Genérico** o **Avanzado**.
+   - Haz click en **"Anonimizar"**.
+   - Verifica los resultados de la anonimización y editalos a tu gusto según consideres conveniente.
+   - Descarga los resultados anonimizados comprimidos en un archivo .zip.
 
 ### Modos de Anonimización:
 - **Genérico**: Reemplaza entidades detectadas con términos genéricos como `[persona]`, `[lugar]`, `[organización]`.
