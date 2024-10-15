@@ -51,8 +51,6 @@ El propósito de este proyecto es proporcionar una herramienta fácil de usar pa
      ```
 
 4. **Accede a la aplicación** desde tu navegador en `http://localhost:8080`.
-```
-
 
 ## ⚙️ Requisitos
 
