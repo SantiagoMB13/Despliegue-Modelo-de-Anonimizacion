@@ -109,3 +109,29 @@
 .text-container textarea {
     resize: none;
 }
+
+#input-text {
+    resize: none;
+    overflow-y: auto;
+    min-height: 120px;
+    max-height: 250px;
+    line-height: 1.5em;
+    transition: height 0.2s ease;
+}
+
+#input-text::-webkit-scrollbar {
+    width: 8px;
+}
+
+#input-text::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#input-text::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#input-text::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

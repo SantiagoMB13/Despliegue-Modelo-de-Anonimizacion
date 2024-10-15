@@ -36,9 +36,23 @@ El propósito de este proyecto es proporcionar una herramienta fácil de usar pa
 2. **Navega a la carpeta del proyecto**:
     ```bash
     cd Despliegue-Modelo-de-Anonimizacion
-3. **Despliega el programa en un servidor local**:
-   ```bash
-   python -m http.server
+3. **Despliega el programa en un servidor local usando Docker**:
+
+   - **Si no tienes Docker instalado**, puedes descargarlo [aquí](https://docs.docker.com/get-docker/).
+   
+   - **Construir la imagen de Docker**:
+     ```bash
+     docker build -t mi-proyecto-web .
+     ```
+
+   - **Ejecutar el contenedor**:
+     ```bash
+     docker run -d -p 8080:80 mi-proyecto-web
+     ```
+
+4. **Accede a la aplicación** desde tu navegador en `http://localhost:8080`.
+```
+
 
 ## ⚙️ Requisitos
 
